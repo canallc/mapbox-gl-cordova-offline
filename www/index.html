@@ -7,7 +7,12 @@
     <link href='mapbox-gl.css' rel='stylesheet'/>
     <script type="text/javascript" src="cordova.js"></script>
     <!--script src='http://172.27.203.11:8080/www/mapbox-gl-cordova-offline-dev.js'></script-->
-    <script src='mapbox-gl-cordova-offline.js'></script>
+    <!-- <script src='mapbox-gl-cordova-offline.js'></script> -->
+
+    <!-- Used for browser platform -->
+    <script src="sql-wasm.js"></script>
+    
+    <script src='mapbox-gl-cordova-offline-unminified.js'></script>
     <style>
         body {
             margin: 0;
@@ -29,16 +34,19 @@
     'cordova' in window ? document.addEventListener('deviceready', init, false) : init()
 
     function init () {
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZGFuc3RlcnJldHQiLCJhIjoiY2p1eDR3MnVvMGpwaDQ0bXd5ZGN5YnkycSJ9.frfcMShUY9fZAbcnzaSCSw';
         new mapboxgl.OfflineMap({
             container: 'map',
             style: 'styles/osm-bright/style-offline.json',
+            // style: 'styles/osm-bright/original-style-offline.json',
             center: [
-                2.15,
-                41.38
+                -106.43,
+                39.01
             ],
             zoom: 12,
-            bearing: -45,
-            hash: true
+            hash: true,
+            maxNativeZoom: 14,
+            maxZoom: 22,
         }).then(function (map) {
             map.addControl(new mapboxgl.NavigationControl())
         })

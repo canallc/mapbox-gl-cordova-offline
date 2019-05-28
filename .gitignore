@@ -4,4 +4,4 @@ platforms/
 plugins/
 .DS_Store
 rollup/build/mapboxgl/
-
+www/data/2017-07-03_us_colorado.mbtiles

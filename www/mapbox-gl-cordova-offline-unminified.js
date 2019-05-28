@@ -1,4 +1,4 @@
-/* Mapbox GL JS is licensed under the 3-Clause BSD License. Full text of license: https://github.com/mapbox/mapbox-gl-js/blob/v0.2.0/LICENSE.txt */
+/* Mapbox GL JS is licensed under the 3-Clause BSD License. Full text of license: https://github.com/mapbox/mapbox-gl-js/blob/v0.2.1/LICENSE.txt */
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 typeof define === 'function' && define.amd ? define(factory) :
@@ -17264,15 +17264,139 @@ function shapeIcon(image, iconOffset, iconAnchor) {
     };
 }
 
+var byteLength_1 = byteLength;
+var toByteArray_1 = toByteArray;
+var fromByteArray_1 = fromByteArray;
+var lookup = [];
+var revLookup = [];
+var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
+var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+for (var i = 0, len$5 = code.length; i < len$5; ++i) {
+    lookup[i] = code[i];
+    revLookup[code.charCodeAt(i)] = i;
+}
+revLookup['-'.charCodeAt(0)] = 62;
+revLookup['_'.charCodeAt(0)] = 63;
+function getLens(b64) {
+    var len = b64.length;
+    if (len % 4 > 0) {
+        throw new Error('Invalid string. Length must be a multiple of 4');
+    }
+    var validLen = b64.indexOf('=');
+    if (validLen === -1)
+        { validLen = len; }
+    var placeHoldersLen = validLen === len ? 0 : 4 - validLen % 4;
+    return [
+        validLen,
+        placeHoldersLen
+    ];
+}
+function byteLength(b64) {
+    var lens = getLens(b64);
+    var validLen = lens[0];
+    var placeHoldersLen = lens[1];
+    return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+}
+function _byteLength(b64, validLen, placeHoldersLen) {
+    return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+}
+function toByteArray(b64) {
+    var tmp;
+    var lens = getLens(b64);
+    var validLen = lens[0];
+    var placeHoldersLen = lens[1];
+    var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
+    var curByte = 0;
+    var len = placeHoldersLen > 0 ? validLen - 4 : validLen;
+    for (var i = 0; i < len; i += 4) {
+        tmp = revLookup[b64.charCodeAt(i)] << 18 | revLookup[b64.charCodeAt(i + 1)] << 12 | revLookup[b64.charCodeAt(i + 2)] << 6 | revLookup[b64.charCodeAt(i + 3)];
+        arr[curByte++] = tmp >> 16 & 255;
+        arr[curByte++] = tmp >> 8 & 255;
+        arr[curByte++] = tmp & 255;
+    }
+    if (placeHoldersLen === 2) {
+        tmp = revLookup[b64.charCodeAt(i)] << 2 | revLookup[b64.charCodeAt(i + 1)] >> 4;
+        arr[curByte++] = tmp & 255;
+    }
+    if (placeHoldersLen === 1) {
+        tmp = revLookup[b64.charCodeAt(i)] << 10 | revLookup[b64.charCodeAt(i + 1)] << 4 | revLookup[b64.charCodeAt(i + 2)] >> 2;
+        arr[curByte++] = tmp >> 8 & 255;
+        arr[curByte++] = tmp & 255;
+    }
+    return arr;
+}
+function tripletToBase64(num) {
+    return lookup[num >> 18 & 63] + lookup[num >> 12 & 63] + lookup[num >> 6 & 63] + lookup[num & 63];
+}
+function encodeChunk(uint8, start, end) {
+    var tmp;
+    var output = [];
+    for (var i = start; i < end; i += 3) {
+        tmp = (uint8[i] << 16 & 16711680) + (uint8[i + 1] << 8 & 65280) + (uint8[i + 2] & 255);
+        output.push(tripletToBase64(tmp));
+    }
+    return output.join('');
+}
+function fromByteArray(uint8) {
+    var tmp;
+    var len = uint8.length;
+    var extraBytes = len % 3;
+    var parts = [];
+    var maxChunkLength = 16383;
+    for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+        parts.push(encodeChunk(uint8, i, i + maxChunkLength > len2 ? len2 : i + maxChunkLength));
+    }
+    if (extraBytes === 1) {
+        tmp = uint8[len - 1];
+        parts.push(lookup[tmp >> 2] + lookup[tmp << 4 & 63] + '==');
+    } else if (extraBytes === 2) {
+        tmp = (uint8[len - 2] << 8) + uint8[len - 1];
+        parts.push(lookup[tmp >> 10] + lookup[tmp >> 4 & 63] + lookup[tmp << 2 & 63] + '=');
+    }
+    return parts.join('');
+}
+
+var base64Js = {
+	byteLength: byteLength_1,
+	toByteArray: toByteArray_1,
+	fromByteArray: fromByteArray_1
+};
+
 var Database = function Database () {};
 
 Database.openDatabase = function openDatabase (dbLocation) {
     var dbName = dbLocation.split('/').slice(-1)[0];
     var source = this;
-    if ('sqlitePlugin' in self) {
-        if ('device' in self) {
+    var isBrowser = !window.device || device.platform === 'browser';
+    if ('sqlitePlugin' in self || isBrowser) {
+        if ('device' in self || isBrowser) {
             return new Promise(function (resolve, reject) {
-                if (device.platform === 'Android') {
+                if (isBrowser) {
+                    var getRootFile = function () {
+                        window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+                        window.requestFileSystem(window.PERSISTENT, 1000 * 1024 * 1024, function (fs) {
+                            resolve(fs.root);
+                        }, function (err) {
+                            console.error('err', err);
+                            reject(err);
+                        });
+                    };
+                    if (!window.device) {
+                        setTimeout(function () {
+                            getRootFile();
+                        }, 2000);
+                    } else {
+                        if (window.isFilePluginReadyRaised) {
+                            console.log('File plugin is already ready');
+                            getRootFile();
+                        } else {
+                            window.addEventListener('filePluginIsReady', function () {
+                                console.log('File plugin is ready');
+                                getRootFile();
+                            }, false);
+                        }
+                    }
+                } else if (device.platform === 'Android') {
                     resolveLocalFileSystemURL(cordova.file.applicationStorageDirectory, function (dir) {
                         dir.getDirectory('databases', { create: true }, function (subdir) {
                             resolve(subdir);
@@ -17289,7 +17413,26 @@ Database.openDatabase = function openDatabase (dbLocation) {
                 }).catch(function () {
                     return source.copyDatabaseFile(dbLocation, dbName, targetDir);
                 });
-            }).then(function () {
+            }).then(function (dbFileEntry) {
+                if (isBrowser) {
+                    return window.initSqlJs().then(function (SQL) {
+                        return new Promise(function (resolve) {
+                            try {
+                                dbFileEntry.file(function (file) {
+                                    var fileReader = new FileReader();
+                                    fileReader.onloadend = function () {
+                                        resolve(new SQL.Database(new Uint8Array(this.result)));
+                                    };
+                                    fileReader.readAsArrayBuffer(file);
+                                });
+                            } catch (err) {
+                                console.error('Error trying to read dbFile', err);
+                            }
+                        });
+                    }, function (err) {
+                        console.error('Error calling initSqlJs', err);
+                    });
+                }
                 var params = { name: dbName };
                 if (device.platform === 'iOS') {
                     params.iosDatabaseLocation = 'Documents';
@@ -17307,6 +17450,31 @@ Database.openDatabase = function openDatabase (dbLocation) {
 };
 Database.copyDatabaseFile = function copyDatabaseFile (dbLocation, dbName, targetDir) {
     console.log('Copying database to application storage directory');
+    if (!window.device || device.platform === 'browser') {
+        return new Promise(function (resolve, reject) {
+            var input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.style.position = 'absolute';
+            input.style.top = '50%';
+            input.style.left = '50%';
+            input.style.marginLeft = '-119px';
+            document.body.append(input);
+            input.onchange = function () {
+                var file = this.files[0];
+                targetDir.getFile(dbName, {
+                    create: true,
+                    exclusive: true
+                }, function (newFile) {
+                    newFile.createWriter(function (fileWriter) {
+                        fileWriter.write(file);
+                        resolve(newFile);
+                        input.style.display = 'none';
+                    });
+                });
+            };
+            alert('Select the database file');
+        });
+    }
     return new Promise(function (resolve, reject) {
         var absPath = cordova.file.applicationDirectory + 'www/' + dbLocation;
         resolveLocalFileSystemURL(absPath, resolve, reject);
@@ -17387,6 +17555,29 @@ var RasterTileSourceOffline = (function (RasterTileSource$$1) {
     RasterTileSourceOffline.prototype._getBlob = function _getBlob (coord, callback) {
         var this$1 = this;
 
+        if (device.platform === 'browser') {
+            var coordY$1 = Math.pow(2, coord.z) - 1 - coord.y;
+            var query$1 = 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?';
+            var params$1 = [
+                coord.z,
+                coord.x,
+                coordY$1
+            ];
+            var base64Prefix$1 = 'data:image/' + this.imageFormat + ';base64,';
+            this.db.then(function (db) {
+                db.each(query$1, params$1, function (result) {
+                    callback(undefined, {
+                        data: base64Prefix$1 + base64Js.fromByteArray(result.tile_data),
+                        cacheControl: null,
+                        expires: null
+                    });
+                }, function (done) {
+                });
+            }).catch(function (err) {
+                callback(err);
+            });
+            return;
+        }
         var coordY = Math.pow(2, coord.z) - 1 - coord.y;
         var query = 'SELECT BASE64(tile_data) AS base64_tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?';
         var params = [
@@ -17581,6 +17772,7 @@ exports.EvaluationParameters = EvaluationParameters;
 exports.webpSupported = exported$1;
 exports.version = version;
 exports.setRTLTextPlugin = setRTLTextPlugin;
+exports.base64js = base64Js;
 exports.Database = Database;
 exports.RasterTileSourceOffline = RasterTileSourceOffline;
 exports.values = values;
@@ -39259,104 +39451,6 @@ var inflate_1$1 = {
 	ungzip: ungzip
 };
 
-var byteLength_1 = byteLength;
-var toByteArray_1 = toByteArray;
-var fromByteArray_1 = fromByteArray;
-var lookup = [];
-var revLookup = [];
-var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
-var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-for (var i = 0, len = code.length; i < len; ++i) {
-    lookup[i] = code[i];
-    revLookup[code.charCodeAt(i)] = i;
-}
-revLookup['-'.charCodeAt(0)] = 62;
-revLookup['_'.charCodeAt(0)] = 63;
-function getLens(b64) {
-    var len = b64.length;
-    if (len % 4 > 0) {
-        throw new Error('Invalid string. Length must be a multiple of 4');
-    }
-    var validLen = b64.indexOf('=');
-    if (validLen === -1)
-        { validLen = len; }
-    var placeHoldersLen = validLen === len ? 0 : 4 - validLen % 4;
-    return [
-        validLen,
-        placeHoldersLen
-    ];
-}
-function byteLength(b64) {
-    var lens = getLens(b64);
-    var validLen = lens[0];
-    var placeHoldersLen = lens[1];
-    return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
-}
-function _byteLength(b64, validLen, placeHoldersLen) {
-    return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
-}
-function toByteArray(b64) {
-    var tmp;
-    var lens = getLens(b64);
-    var validLen = lens[0];
-    var placeHoldersLen = lens[1];
-    var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
-    var curByte = 0;
-    var len = placeHoldersLen > 0 ? validLen - 4 : validLen;
-    for (var i = 0; i < len; i += 4) {
-        tmp = revLookup[b64.charCodeAt(i)] << 18 | revLookup[b64.charCodeAt(i + 1)] << 12 | revLookup[b64.charCodeAt(i + 2)] << 6 | revLookup[b64.charCodeAt(i + 3)];
-        arr[curByte++] = tmp >> 16 & 255;
-        arr[curByte++] = tmp >> 8 & 255;
-        arr[curByte++] = tmp & 255;
-    }
-    if (placeHoldersLen === 2) {
-        tmp = revLookup[b64.charCodeAt(i)] << 2 | revLookup[b64.charCodeAt(i + 1)] >> 4;
-        arr[curByte++] = tmp & 255;
-    }
-    if (placeHoldersLen === 1) {
-        tmp = revLookup[b64.charCodeAt(i)] << 10 | revLookup[b64.charCodeAt(i + 1)] << 4 | revLookup[b64.charCodeAt(i + 2)] >> 2;
-        arr[curByte++] = tmp >> 8 & 255;
-        arr[curByte++] = tmp & 255;
-    }
-    return arr;
-}
-function tripletToBase64(num) {
-    return lookup[num >> 18 & 63] + lookup[num >> 12 & 63] + lookup[num >> 6 & 63] + lookup[num & 63];
-}
-function encodeChunk(uint8, start, end) {
-    var tmp;
-    var output = [];
-    for (var i = start; i < end; i += 3) {
-        tmp = (uint8[i] << 16 & 16711680) + (uint8[i + 1] << 8 & 65280) + (uint8[i + 2] & 255);
-        output.push(tripletToBase64(tmp));
-    }
-    return output.join('');
-}
-function fromByteArray(uint8) {
-    var tmp;
-    var len = uint8.length;
-    var extraBytes = len % 3;
-    var parts = [];
-    var maxChunkLength = 16383;
-    for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-        parts.push(encodeChunk(uint8, i, i + maxChunkLength > len2 ? len2 : i + maxChunkLength));
-    }
-    if (extraBytes === 1) {
-        tmp = uint8[len - 1];
-        parts.push(lookup[tmp >> 2] + lookup[tmp << 4 & 63] + '==');
-    } else if (extraBytes === 2) {
-        tmp = (uint8[len - 2] << 8) + uint8[len - 1];
-        parts.push(lookup[tmp >> 10] + lookup[tmp >> 4 & 63] + lookup[tmp << 2 & 63] + '=');
-    }
-    return parts.join('');
-}
-
-var base64Js = {
-	byteLength: byteLength_1,
-	toByteArray: toByteArray_1,
-	fromByteArray: fromByteArray_1
-};
-
 var MBTilesSource = (function (VectorTileSource$$1) {
     function MBTilesSource(id, options, dispatcher, eventedParent) {
         VectorTileSource$$1.call(this, id, options, dispatcher, eventedParent);
@@ -39374,6 +39468,24 @@ var MBTilesSource = (function (VectorTileSource$$1) {
         return __chunk_1.Database.copyDatabaseFile(dbLocation, dbName, targetDir);
     };
     MBTilesSource.prototype.readTile = function readTile (z, x, y, callback) {
+        if (!window.device || device.platform === 'browser') {
+            var query$1 = 'SELECT tile_data FROM tiles WHERE zoom_level=? AND tile_column=? AND tile_row=?';
+            var params$1 = [
+                z,
+                x,
+                y
+            ];
+            this.db.then(function (db) {
+                db.each(query$1, params$1, function (result) {
+                    var rawData = inflate_1$1.inflate(result.tile_data);
+                    callback(undefined, __chunk_1.base64js.fromByteArray(rawData));
+                }, function (done) {
+                });
+            }).catch(function (err) {
+                callback(err);
+            });
+            return;
+        }
         var query = 'SELECT BASE64(tile_data) AS base64_tile_data FROM tiles WHERE zoom_level=? AND tile_column=? AND tile_row=?';
         var params = [
             z,
@@ -39385,8 +39497,8 @@ var MBTilesSource = (function (VectorTileSource$$1) {
                 txn.executeSql(query, params, function (tx, res) {
                     if (res.rows.length) {
                         var base64Data = res.rows.item(0).base64_tile_data;
-                        var rawData = inflate_1$1.inflate(base64Js.toByteArray(base64Data));
-                        callback(undefined, base64Js.fromByteArray(rawData));
+                        var rawData = inflate_1$1.inflate(__chunk_1.base64js.toByteArray(base64Data));
+                        callback(undefined, __chunk_1.base64js.fromByteArray(rawData));
                     } else {
                         callback(new Error('tile ' + params.join(',') + ' not found'));
                     }

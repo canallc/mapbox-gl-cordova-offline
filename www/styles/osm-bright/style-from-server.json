@@ -38,25 +38,20 @@
     "openmaptiles:mapbox:owner": "openmaptiles",
     "openmaptiles:mapbox:source:url": "mapbox://openmaptiles.4qljc88t"
   },
-  "center": [
-    2.15,
-    41.38
-  ],
-  "zoom": 12,
   "sources": {
     "openmaptiles": {
-      "type": "mbtiles",
-      "path": "data/2017-07-03_us_colorado.mbtiles",
-      "attribution": "<a href=\"http://www.openmaptiles.org/\" target=\"_blank\">&copy; OpenMapTiles</a> <a href=\"http://www.openstreetmap.org/about/\" target=\"_blank\">&copy; OpenStreetMap contributors</a>",
-      "maxzoom": 14
-    },
-    "terrain": {
-        "url": "mapbox://mapbox.mapbox-terrain-v2",
-        "type": "vector"
+      "type": "vector",
+      "url": "http://localhost:32769/data/v3.json"
     }
   },
-  "sprite": "styles/osm-bright/sprite",
-  "glyphs": "fonts/{fontstack}/{range}.pbf",
+
+
+
+
+
+
+  "sprite": "http://localhost:32769/styles/osm-bright/sprite",
+  "glyphs": "http://localhost:32769/fonts/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",
@@ -3744,7 +3739,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Italic"
+          "Noto Sans Italic"
         ],
         "text-size": 14,
         "text-field": "{name:latin} {name:nonlatin}",
@@ -3772,7 +3767,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Italic"
+          "Noto Sans Italic"
         ],
         "text-size": 14,
         "text-field": "{name:latin}\n{name:nonlatin}",
@@ -3808,7 +3803,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Italic"
+          "Noto Sans Italic"
         ],
         "text-size": 14,
         "text-field": "{name:latin}",
@@ -3844,7 +3839,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Italic"
+          "Noto Sans Italic"
         ],
         "text-size": {
           "stops": [
@@ -3894,7 +3889,7 @@
       "layout": {
         "text-padding": 2,
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-anchor": "top",
         "icon-image": "{class}_11",
@@ -3940,7 +3935,7 @@
       "layout": {
         "text-padding": 2,
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-anchor": "top",
         "icon-image": "{class}_11",
@@ -3985,7 +3980,7 @@
       "layout": {
         "text-padding": 2,
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-anchor": "top",
         "icon-image": "{class}_11",
@@ -4035,7 +4030,7 @@
       "layout": {
         "text-padding": 2,
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-anchor": "top",
         "icon-image": "{class}_11",
@@ -4163,7 +4158,7 @@
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "transportation_name",
-      "minzoom": 14,
+      "minzoom": 15.5,
       "filter": [
         "==",
         "class",
@@ -4184,7 +4179,7 @@
           ]
         },
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-field": "{name:latin} {name:nonlatin}",
         "symbol-placement": "line",
@@ -4232,7 +4227,7 @@
           ]
         },
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-field": "{name:latin} {name:nonlatin}",
         "symbol-placement": "line",
@@ -4273,7 +4268,7 @@
           ]
         },
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-field": "{name:latin} {name:nonlatin}",
         "symbol-placement": "line",
@@ -4317,7 +4312,7 @@
         "icon-rotation-alignment": "viewport",
         "symbol-spacing": 200,
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": {
           "base": 1,
@@ -4368,7 +4363,7 @@
         "icon-rotation-alignment": "viewport",
         "symbol-spacing": 200,
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": {
           "base": 1,
@@ -4426,7 +4421,7 @@
         "icon-rotation-alignment": "viewport",
         "symbol-spacing": 200,
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "symbol-placement": {
           "base": 1,
@@ -4465,7 +4460,7 @@
       "layout": {
         "text-padding": 2,
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-anchor": "top",
         "icon-image": "airport_11",
@@ -4520,7 +4515,7 @@
           ]
         },
         "text-font": [
-          "Klokantech Noto Sans Bold"
+          "Noto Sans Bold"
         ],
         "text-field": "{name:latin}\n{name:nonlatin}",
         "text-transform": "uppercase",
@@ -4548,7 +4543,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "base": 1.2,
@@ -4588,7 +4583,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "base": 1.2,
@@ -4636,7 +4631,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "base": 1.2,
@@ -4684,7 +4679,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Regular"
+          "Noto Sans Regular"
         ],
         "text-size": {
           "base": 1.2,
@@ -4743,7 +4738,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Italic"
+          "Noto Sans Italic"
         ],
         "text-field": "{name:latin}",
         "text-size": {
@@ -4796,7 +4791,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Bold"
+          "Noto Sans Bold"
         ],
         "text-field": "{name:latin}",
         "text-size": {
@@ -4849,7 +4844,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Bold"
+          "Noto Sans Bold"
         ],
         "text-field": "{name:latin}",
         "text-size": {
@@ -4902,7 +4897,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Bold"
+          "Noto Sans Bold"
         ],
         "text-field": "{name:latin}",
         "text-size": {
@@ -4944,7 +4939,7 @@
       ],
       "layout": {
         "text-font": [
-          "Klokantech Noto Sans Bold"
+          "Noto Sans Bold"
         ],
         "text-field": "{name:latin}",
         "text-size": 14,
@@ -4976,80 +4971,6 @@
         "text-halo-color": "rgba(250,250,250,0.15)",
         "text-halo-width": 1
       }
-    },
-    {
-        "id": "hillshade",
-        "type": "fill",
-        "source": "terrain",
-        "source-layer": "hillshade",
-        "maxzoom": 16,
-        "layout": {},
-        "paint": {
-            "fill-color": [
-                "match",
-                ["get", "class"],
-                "shadow",
-                "hsl(56, 59%, 22%)",
-                "hsl(0, 0%, 100%)"
-            ],
-            "fill-opacity": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                14,
-                [
-                    "match",
-                    ["get", "level"],
-                    [67, 56],
-                    0.08,
-                    [89, 78],
-                    0.07,
-                    0.15
-                ],
-                16,
-                0
-            ],
-            "fill-antialias": false
-        }
-    },
-    {
-        "id": "contour-line",
-        "type": "line",
-        "source": "terrain",
-        "source-layer": "contour",
-        "minzoom": 11,
-        "filter": ["!=", ["get", "index"], -1],
-        "layout": {},
-        "paint": {
-            "line-opacity": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                11,
-                ["match", ["get", "index"], [1, 2], 0.15, 0.25],
-                12,
-                ["match", ["get", "index"], [1, 2], 0.3, 0.5]
-            ],
-            "line-color": "hsl(100, 100%, 20%)",
-            "line-width": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                13,
-                ["match", ["get", "index"], [1, 2], 0.5, 0.6],
-                16,
-                ["match", ["get", "index"], [1, 2], 0.8, 1.2]
-            ],
-            "line-offset": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                13,
-                ["match", ["get", "index"], [1, 2], 1, 0.6],
-                16,
-                ["match", ["get", "index"], [1, 2], 1.6, 1.2]
-            ]
-        }
     }
   ]
 }

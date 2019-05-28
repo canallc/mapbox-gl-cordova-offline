@@ -9,6 +9,7 @@ class MBTilesSource extends VectorTileSource {
         super(id, options, dispatcher, eventedParent);
         this.type = "mbtiles";
         this.db = this.openDatabase(options.path);
+        // this.maxzoom = 14;
     }
 
     openDatabase(dbLocation) {
@@ -20,15 +21,32 @@ class MBTilesSource extends VectorTileSource {
     }
 
     readTile(z, x, y, callback) {
+        if (!window.device || device.platform === 'browser') {
+          const query = 'SELECT tile_data FROM tiles WHERE zoom_level=? AND tile_column=? AND tile_row=?';
+          const params = [z, x, y];
+          this.db.then(function(db) {
+            db.each(query, params, function(result) {
+              const rawData = pako.inflate(result.tile_data);
+              callback(undefined, base64js.fromByteArray(rawData)); // Tile contents read, callback success.
+            }, function (done) {
+              // Do nothing
+            });
+          }).catch(function(err) {
+            callback(err);
+          });
+
+          return;
+        }
+
         const query = 'SELECT BASE64(tile_data) AS base64_tile_data FROM tiles WHERE zoom_level=? AND tile_column=? AND tile_row=?';
         const params = [z, x, y];
         this.db.then(function(db) {
             db.transaction(function (txn) {
                 txn.executeSql(query, params, function (tx, res) {
                     if (res.rows.length) {
-                        const base64Data = res.rows.item(0).base64_tile_data;
-                        const rawData = pako.inflate(base64js.toByteArray(base64Data));
-                        callback(undefined, base64js.fromByteArray(rawData)); // Tile contents read, callback success.
+                      const base64Data = res.rows.item(0).base64_tile_data;
+                      const rawData = pako.inflate(base64js.toByteArray(base64Data));
+                      callback(undefined, base64js.fromByteArray(rawData)); // Tile contents read, callback success.
                     } else {
                         callback(new Error('tile ' + params.join(',') + ' not found'));
                     }

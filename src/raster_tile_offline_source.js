@@ -1,6 +1,7 @@
 import RasterTileSource from 'mapbox-gl/src/source/raster_tile_source';
 import { extend, pick } from 'mapbox-gl/src/util/util'
 import Texture from 'mapbox-gl/src/render/texture'
+import base64js from 'base64-js'
 import Database from './database'
 
 class RasterTileSourceOffline extends RasterTileSource {
@@ -76,6 +77,32 @@ class RasterTileSourceOffline extends RasterTileSource {
     }
 
     _getBlob(coord, callback){
+
+        if (device.platform === 'browser') {
+            const coordY = Math.pow(2, coord.z) -1 - coord.y;
+
+            const query = 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?';
+            const params = [coord.z, coord.x, coordY];
+
+            const base64Prefix = 'data:image/' + this.imageFormat + ';base64,';
+
+            this.db.then(function(db) {
+                db.each(query, params, function(result) {
+                    callback(undefined,
+                      {
+                        data: base64Prefix + base64js.fromByteArray(result.tile_data),
+                        cacheControl: null,
+                        expires: null
+                      });
+                }, function (done) {
+                    // Do nothing
+                });
+            }).catch(function(err) {
+                callback(err);
+            });
+
+            return;
+        }
 
         const coordY = Math.pow(2, coord.z) -1 - coord.y;
 

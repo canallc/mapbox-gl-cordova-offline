@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="co.geomati.mapboxGLCordovaOffline" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.canallc.mapboxGLCordovaOffline" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Mapbox GL Cordova Offline</name>
     <description>
         Offline vector maps in Cordova using Mapbox GL JS
@@ -28,4 +28,5 @@
     <plugin name="cordova-plugin-device" spec="1.1.6" />
     <engine name="ios" spec="4.5.4" />
     <engine name="android" spec="6.3.0" />
+    <engine name="browser" spec="5.0.4" />
 </widget>
